@@ -132,21 +132,17 @@ add_introspection_rules([], ["^telecaster\.models\.ShortTextField"])
 
 class Station(Model):
 
-    organization      = ForeignKey(Organization, related_name='stations', verbose_name='organization',
-                                   null=True, on_delete=models.SET_NULL)
-    department        = ForeignKey(Department, related_name='stations', verbose_name='department',
-                                   null=True, on_delete=models.SET_NULL)
-    conference        = ForeignKey(Conference, related_name='stations', verbose_name='conference',
-                                   null=True, on_delete=models.SET_NULL)
-    session           = ForeignKey(Session, related_name='stations', verbose_name='session',
-                                   null=True, blank=True, on_delete=models.SET_NULL)
-    professor         = ForeignKey(Professor, related_name='stations', verbose_name='professor',
-                                   null=True, blank=True, on_delete=models.SET_NULL)
-    professor_free    = CharField(_('professor'), max_length=255, blank=True)
+    public_id         = CharField(_('public_id'), max_length=255, required=True)
+    organization      = CharField(_('organization'), max_length=255, blank=True)
+    department        = CharField(_('department'), max_length=255, blank=True)
+    conference        = CharField(_('conference'), max_length=255, blank=True)
+    session           = CharField(_('session'), max_length=255, blank=True)
+    professor         = CharField(_('professor'), max_length=255, blank=True)
     comment           = ShortTextField(_('comments'), blank=True)
     started           = BooleanField(_('started'))
     datetime_start    = DateTimeField(_('time_start'), blank=True, null=True)
     datetime_stop     = DateTimeField(_('time_stop'), blank=True, null=True)
+
 
     class Meta:
         db_table = app_label + '_' + 'station'
@@ -155,11 +151,12 @@ class Station(Model):
         return ' - '.join(self.description) + ' - ' + str(self.datetime_start) + ' > ' + str(self.datetime_stop)
 
     def to_dict(self):
-        dict = [ {'id':'organization','value': self.organization.name, 'class':'', 'label':'Organization'},
-                {'id': 'department', 'value': self.department.name , 'class':'', 'label':'Departement'},
-                {'id' : 'conference', 'value': self.conference.title, 'class':'' , 'label': 'Conference'},
-                {'id': 'professor', 'value': self.professor.name, 'class':'' , 'label': 'Professor'},
-                {'id': 'session', 'value': self.session.name, 'class':'' , 'label': 'Session'},
+        dict = [{'id':'public_id','value': self.public_id, 'class':'', 'label':'public_id'},
+                {'id':'organization','value': self.organization, 'class':'', 'label':'Organization'},
+                {'id': 'department', 'value': self.department , 'class':'', 'label':'Departement'},
+                {'id' : 'conference', 'value': self.conference, 'class':'' , 'label': 'Conference'},
+                {'id': 'professor', 'value': self.professor, 'class':'' , 'label': 'Professor'},
+                {'id': 'session', 'value': self.session, 'class':'' , 'label': 'Session'},
                 {'id': 'comment', 'value': self.comment, 'class':'' , 'label': 'Comment'},
                 {'id': 'started', 'value': str(self.started), 'class':'' , 'label': 'Started'},
                 ]
@@ -167,11 +164,11 @@ class Station(Model):
 
     @property
     def description(self):
-        description = [self.organization.name, self.conference.department.name, self.conference.title]
+        description = [self.organization, self.conference.department, self.conference]
         if self.session:
-            description.append(self.session.name)
+            description.append(self.session)
         if self.professor:
-            description.append(self.professor.name)
+            description.append(self.professor)
         description.append(self.comment)
         return description
 
@@ -194,12 +191,12 @@ class Station(Model):
         self.ogg_quality = self.conf['media']['ogg_quality']
         self.format = self.conf['media']['format']
         self.channels = int(self.conf['media']['channels'])
-        self.server_name = [self.organization.name, self.conference.department.name, self.conference.title]
+        self.server_name = [self.organization, self.department, self.conference]
         self.ServerDescription = clean_string('-'.join(self.description))
         self.ServerName = clean_string('_-_'.join(self.server_name))
         self.mount_point = self.ServerName + '.' + self.format
         self.filename = clean_string('_-_'.join(self.description[1:])) + '-' + self.time_txt + '.' + self.format
-        self.output_dir = self.rec_dir + os.sep + self.date + os.sep + self.conference.department.name
+        self.output_dir = self.rec_dir + os.sep + self.date + os.sep + self.department
         self.file_dir = self.output_dir + os.sep + self.ServerName
         self.uid = os.getuid()
         self.deefuzzer_pid = get_pid('/usr/bin/deefuzzer '+self.deefuzzer_user_file, self.uid)
@@ -314,6 +311,7 @@ class Station(Model):
 #        self.deefuzzer_setup()
 #        self.deefuzzer_write_conf()
 #        self.deefuzzer_start()
+        self.save()
 
     def stop(self):
         self.started = False
@@ -321,6 +319,15 @@ class Station(Model):
 #        self.rec_stop()
 #        time.sleep(2)
 #        self.deefuzzer_stop()
+        self.save()
+
+    def configure(self, dict):
+        self.organization = dict['organization']
+        self.department = dict['department']
+        self.session = dict['session']
+        self.professor = dict['professor']
+        self.comment = dict['comment']
+        self.save()
 
 
 class Record(Model):
