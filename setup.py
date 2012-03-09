@@ -16,6 +16,7 @@ setup(
   install_requires = [
         'django>=1.3.1',
         'django-json-rpc',
+        'deefuzzer',
         'south',
   ],
   platforms=['OS Independent'],
