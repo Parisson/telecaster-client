@@ -2,8 +2,7 @@
 README - TELECASTER
 ===================
 
-TeleCaster is a web controlled audio/video recording and braodcasting system.
-
+Video LIVE recording and streaming system based on Gstreamer, JACK, VncServer, Fluxbox
 
 LICENCE
 =======
