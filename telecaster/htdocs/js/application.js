@@ -171,3 +171,81 @@ function server_status_callback(){
     refresh();
     setInterval(refresh,d);
 };
+
+function station_status(){
+    var j = json; //global variable
+    var data = j({},"telecaster.station_status",
+                     function(data){
+                         var res = data.result;
+                         return res;
+                     },
+                     function(){
+                         return false;
+                     }
+                     );
+};
+
+
+
+var playlistUtils = {
+    playlists : [],
+
+    /**
+     * Returns an uniqid by creating the current local time in millisecond + a random number. Used for markers and some json calls
+     * Copied from Timeside.utils.uniqid (Timeside might NOT ALWAYS be loaded, see home.html when user is authenitcated)
+     **/
+
+    uniqid : function() {
+        var d = new Date();
+        return new String(d.getTime() + '' + Math.floor(Math.random() * 1000000)).substr(0, 18);
+    },
+
+    start : function(dictionary){
+
+        if(dictionary.public_id===undefined){
+            dictionary.public_id = this.uniqid(); //defined in application.js
+        }
+        json([dictionary],'telemeta.start',function(){
+            station_status();
+        });
+    },
+
+     showForm: function(anchorElement, id){
+
+        var o = 'organization';
+        var d = 'department';
+        var d = 'department';
+
+        var dd = {};
+        var playlist = this;
+
+        var playlists = this.playlists;
+        for (var i=0; i< playlists.length; i++){
+            if (playlists[i].id == id){
+                dd[t] = playlists[i].title;
+                dd[d] = playlists[i].description;
+            }
+        }
+
+        new PopupDiv({
+            'content':dd,
+                    invoker:anchorElement,
+                    showOk:true,
+                    onOk:function(data){
+                        if(!data[t] && !data[d]){
+                            return;
+                        }
+                        //convert language
+                        playlist.update({
+                            'public_id': id,
+                            'title': data[t],
+                            'description': data[d],
+                        });
+                    }
+        }).show();
+    },
+
+}
+
+
+

@@ -37,7 +37,7 @@ def render(request, template, data = None, mimetype = None):
 
 class WebView(object):
 
-    hidden_fields = ['started', 'datetime_start', 'datetime_stop']
+    hidden_fields = ['started', 'datetime_start', 'datetime_stop', 'public_id']
 
     def __init__(self, conf_file):
         self.uid = os.getuid()
@@ -45,7 +45,7 @@ class WebView(object):
         self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
         if not os.path.exists(self.user_dir):
             os.makedirs(self.user_dir)
-        self.conf_file = conf_file
+        self.conf_file = settings.TELECASTER_CONF
         conf_dict = xml2dict(self.conf_file)
         self.conf = conf_dict['telecaster']
         self.title = self.conf['infos']['name']
@@ -54,44 +54,15 @@ class WebView(object):
         self.url = self.conf['infos']['url']
         self.status = Status()
 
-    def index(self, request, id=None):
+    def index(self, request):
+        template = 'telecaster/index.html'
         stations = Station.objects.filter(started=True)
         if stations:
-            # FIXME: manage multiple stations
-            template = 'telecaster/stop.html'
-            if id:
-                station = Station.objects.get(id=id)
-            else:
-                station = stations[0]
-            if request.method == 'POST':
-                station.stop()
-#                time.sleep(2)
-                station.save()
-                self.logger.write_info('stop')
-                return HttpResponseRedirect('/telecaster/record')
-            else:
-                return render(request, template, {'station': station, 'hidden_fields': self.hidden_fields, 'host': self.get_host(request) })
-        else:
-            return HttpResponseRedirect('/telecaster/record')
+            messages.warning(request, 'A station is already started !')
+        form = StationForm()
+        return render(request, template, {'station': form, 'hidden_fields': self.hidden_fields,
+                                            'host': self.get_host(request) })
 
-
-    def record(self, request):
-        template = 'telecaster/start.html'
-        if request.method == 'POST':
-            station = Station()
-            form = StationForm(data=request.POST, instance=station)
-            if form.is_valid():
-                station.set_conf(self.conf)
-                station.setup()
-                station.start()
-                station.save()
-                self.logger.write_info('start')
-#                time.sleep(2)
-                return HttpResponseRedirect('/telecaster/')
-        else:
-            form = StationForm()
-
-        return render(request, template, {'station': form, 'hidden_fields': self.hidden_fields, 'host': self.get_host(request) })
 
     def get_host(self, request):
         host = request.META['HTTP_HOST']
@@ -105,10 +76,6 @@ class WebView(object):
         status.update()
         return status.to_dict()
 
-    def get_server_status(self):
-        self.status.update()
-        return self.status
-
     @jsonrpc_method('telecaster.get_station_status')
     def get_station_status(request):
         stations = Station.objects.filter(started=True)
@@ -117,3 +84,23 @@ class WebView(object):
         else:
             station = {}
         return station
+
+    @jsonrpc_method('telecaster.start')
+    def start(request, station_dict):
+        if isinstance(station_dict, dict):
+            station = Station(public_id=dict['public_id'])
+            station.configure(station_dict)
+            conf = xml2dict(settings.TELECASTER_CONF)
+            conf = conf['telecaster']
+            station.set_conf(conf)
+            station.setup()
+            station.start()
+        else:
+            messages.error(request, 'Bad station dictionary')
+
+    @jsonrpc_method('telecaster.stop')
+    def stop(request):
+        stations = Station.objects.filter(started=True)
+        for station in stations:
+            station.stop()
+

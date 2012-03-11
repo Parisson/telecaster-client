@@ -43,12 +43,11 @@ import os.path
 
 
 # initialization
-web_view = WebView(settings.TELECASTER_CONF)
+web_view = WebView()
 htdocs = os.path.dirname(__file__) + '/htdocs'
 
 urlpatterns = patterns('',
     url(r'^$', web_view.index, name="telecaster-index"),
-    url(r'^record/$', web_view.record, name="telecaster-record"),
     url(r'^items/(?P<id>.*)$', web_view.index, name="telecaster-item"),
 
     # CSS+Images (FIXME: for developement only)
