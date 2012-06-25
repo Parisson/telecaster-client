@@ -41,24 +41,12 @@ from telecaster.views import WebView
 from jsonrpc import jsonrpc_site
 import os.path
 
-
 # initialization
 web_view = WebView()
-htdocs = os.path.dirname(__file__) + '/htdocs'
 
 urlpatterns = patterns('',
     url(r'^$', web_view.index, name="telecaster-index"),
-    url(r'^items/(?P<id>.*)$', web_view.index, name="telecaster-item"),
-
-    # CSS+Images (FIXME: for developement only)
-    url(r'^css/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': htdocs+'/css'}, name="telecaster-css"),
-    url(r'images/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': htdocs+'/images'}, name="telecaster-images"),
-    url(r'^js/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': htdocs+'/js'}, name="telecaster-js"),
-    url(r'^video-js/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': htdocs+'/video-js'}, name="telecaster-video-js"),
+    url(r'^stations/(?P<id>.*)/detail/$', web_view.index, name="telecaster-station-detail"),
 
     # JSON RPC
     url(r'json/$', jsonrpc_site.dispatch, name='jsonrpc_mountpoint'),

@@ -39,7 +39,7 @@ class WebView(object):
 
     hidden_fields = ['started', 'datetime_start', 'datetime_stop', 'public_id']
 
-    def __init__(self, conf_file):
+    def __init__(self):
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
         self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'

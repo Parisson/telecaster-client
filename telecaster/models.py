@@ -53,71 +53,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from south.modelsinspector import add_introspection_rules
 
+from teleforma.models import *
+
 app_label = 'telecaster'
-
-
-class Organization(Model):
-
-    name            = CharField(_('name'), max_length=255)
-    description     = CharField(_('description'), max_length=255, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = app_label + '_' + 'organization'
-
-class Department(Model):
-
-    name            = CharField(_('name'), max_length=255)
-    description     = CharField(_('description'), max_length=255, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = app_label + '_' + 'department'
-
-
-class Conference(Model):
-
-    title           = CharField(_('title'), max_length=255)
-    description     = CharField(_('description'), max_length=255, blank=True)
-    department      = ForeignKey('Department', related_name='conferences', verbose_name='department')
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        db_table = app_label + '_' + 'conference'
-
-
-class Session(Model):
-
-    name            = CharField(_('name'), max_length=255)
-    description     = CharField(_('description'), max_length=255, blank=True)
-    number          = IntegerField(_('number'))
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = app_label + '_' + 'session'
-
-
-class Professor(Model):
-
-    name            = CharField(_('name'), max_length=255)
-    institution     = CharField(_('institution'), max_length=255, blank=True)
-    address         = CharField(_('address'), max_length=255, blank=True)
-    telephone       = CharField(_('telephone'), max_length=255, blank=True)
-    email           = CharField(_('email'), max_length=255, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = app_label + '_' + 'professor'
 
 
 class ShortTextField(models.TextField):
@@ -128,16 +66,28 @@ class ShortTextField(models.TextField):
          )
          return super(ShortTextField, self).formfield(**kwargs)
 
+
 add_introspection_rules([], ["^telecaster\.models\.ShortTextField"])
+
 
 class Station(Model):
 
-    public_id         = CharField(_('public_id'), max_length=255, required=True)
-    organization      = CharField(_('organization'), max_length=255, blank=True)
-    department        = CharField(_('department'), max_length=255, blank=True)
-    conference        = CharField(_('conference'), max_length=255, blank=True)
-    session           = CharField(_('session'), max_length=255, blank=True)
-    professor         = CharField(_('professor'), max_length=255, blank=True)
+    public_id         = CharField(_('public_id'), max_length=255)
+    organization      = ForeignKey('Organization', related_name='station',
+                                   verbose_name=_('organization'),
+                                   blank=True, null=True)
+    department        = ForeignKey('Department', related_name='station',
+                                   verbose_name=_('department'),
+                                   blank=True, null=True)
+    conference        = ForeignKey('Conference', related_name='station',
+                                   verbose_name=_('conference'),
+                                   blank=True, null=True)
+    session           = ForeignKey('Session', related_name='station',
+                                   verbose_name=_('session'),
+                                   blank=True, null=True)
+    professor         = ForeignKey('Professor', related_name='station',
+                                   verbose_name=_('professor'),
+                                   blank=True, null=True)
     comment           = ShortTextField(_('comments'), blank=True)
     started           = BooleanField(_('started'))
     datetime_start    = DateTimeField(_('time_start'), blank=True, null=True)
@@ -147,13 +97,13 @@ class Station(Model):
     class Meta:
         db_table = app_label + '_' + 'station'
 
-    def __str__(self):
+    def __unicode__(self):
         return ' - '.join(self.description) + ' - ' + str(self.datetime_start) + ' > ' + str(self.datetime_stop)
 
     def to_dict(self):
         dict = [{'id':'public_id','value': self.public_id, 'class':'', 'label':'public_id'},
                 {'id':'organization','value': self.organization, 'class':'', 'label':'Organization'},
-                {'id': 'department', 'value': self.department , 'class':'', 'label':'Departement'},
+                {'id': 'department', 'value': self.department , 'class':'', 'label':'Department'},
                 {'id' : 'conference', 'value': self.conference, 'class':'' , 'label': 'Conference'},
                 {'id': 'professor', 'value': self.professor, 'class':'' , 'label': 'Professor'},
                 {'id': 'session', 'value': self.session, 'class':'' , 'label': 'Session'},
@@ -164,11 +114,11 @@ class Station(Model):
 
     @property
     def description(self):
-        description = [self.organization, self.conference.department, self.conference]
+        description = [self.organization.name, self.conference.department.name, self.conference.title]
         if self.session:
-            description.append(self.session)
+            description.append(self.session.name)
         if self.professor:
-            description.append(self.professor)
+            description.append(self.professor.name)
         description.append(self.comment)
         return description
 
@@ -336,4 +286,6 @@ class Record(Model):
                          blank=True, null=True, on_delete=models.SET_NULL)
     datetime = DateTimeField(_('record_date'), auto_now=True)
     file = FileField(_('file'), upload_to='items/%Y/%m/%d')
+
+
 

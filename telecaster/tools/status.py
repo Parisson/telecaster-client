@@ -47,7 +47,7 @@ class Status(object):
         self.acpi = acpi.Acpi()
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
+        self.user_dir = '/home/' + self.user + '/.telecaster'
 
     def update(self):
         self.acpi.update()
@@ -91,11 +91,11 @@ class Status(object):
         self.name = get_hostname()
 
     def get_ids(self):
-        edcast_pid = get_pid('edcast_jack', self.uid)
-        deefuzzer_pid = get_pid('/usr/bin/deefuzzer '+self.user_dir+os.sep+'deefuzzer.xml', self.uid)
-        jackd_pid = get_pid('jackd', self.uid)
+        edcast_pid = get_pid('edcast_jack', args=False)
+        deefuzzer_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'deefuzzer.xml')
+        jackd_pid = get_pid('jackd', args=False)
         if jackd_pid == []:
-            jackd_pid = get_pid('jackdbus', self.uid)
+            jackd_pid = get_pid('jackdbus', args=False)
         self.writing = edcast_pid != []
         self.casting = deefuzzer_pid != []
         self.jacking = jackd_pid != []

@@ -12,12 +12,15 @@ setup(
   long_description = open('README.rst').read(),
   author = "Guillaume Pellerin",
   author_email = "yomguy@parisson.com",
-  version = telecaster.__version__,
+  version = '0.6',
   install_requires = [
-        'django>=1.3.1',
+        'django>=1.4.0',
         'django-json-rpc',
-        'deefuzzer',
         'south',
+        'deefuzzer',
+        'telemeta',
+        'teleforma',
+        'psutil'
   ],
   platforms=['OS Independent'],
   license='CeCILL v2',

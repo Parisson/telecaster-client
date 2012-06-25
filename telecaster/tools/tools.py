@@ -48,6 +48,7 @@ import struct
 import acpi
 import subprocess
 import pwd
+import psutil
 
 class SubProcessPipe:
     def __init__(self, command, stdin=None):
@@ -101,22 +102,26 @@ def xml2dict(conf_file):
     dict = xmltodict(conf_xml,'utf-8')
     return dict
 
-def get_pid(proc,uid):
+import psutil
+
+PROCNAME = "deefuzzer"
+PROCARGS = ".telecaster/deefuzzer_webm.xml"
+
+
+
+
+def get_pid(name, args=None):
     """Get a process pid filtered by arguments and uid"""
-    command = 'pgrep -fl -U '+str(uid)+' '+'"'+proc+'"'
-    proc = SubProcessPipe(command)
-    list = proc.output
-    procs = list.readlines()
     pids = []
-    if procs != '':
-        for proc in procs:
-            pid = proc.split(' ')[0]
-            command = ' '.join(proc.split(' ')[1:])[:-1]
-            pids.append(pid)
-    if len(pids) <= 1:
-        return []
-    else:
-        return [pids[0]]
+    for proc in psutil.process_iter():
+        if proc.cmdline:
+            if name == proc.name:
+                if args:
+                    if args == proc.cmdline[-1]:
+                        return proc.pid
+                else:
+                    return proc.pid
+    return ''
 
 def get_params_from_lock(lock_file):
     lockfile = open(lock_file,'r')

@@ -12,18 +12,18 @@
 {% block javascript %}
 <script src="{% url telecaster-js "jquery-1.6.min.js" %}" type="text/javascript"></script>
 <script src="{% url telecaster-js "application.js" %}" type="text/javascript"></script>
-<script src="{% url telecaster-video-js "video.js" %}" type="text/javascript"></script>
+<!--<script src="{% url telecaster-video-js "video.js" %}" type="text/javascript"></script>-->
 {% endblock javascript %}
 
 <script type="text/javascript">
 {% block extrajavascript %}
 
 
-_V_("video_1").ready(function(){
-    var myPlayer = this;
-    myPlayer.volume(0);
-    // myPlayer.currentTime(120);
-    });
+// _V_("video_1").ready(function(){
+//     var myPlayer = this;
+//     myPlayer.volume(0);
+//     // myPlayer.currentTime(120);
+//     });
 
 
 jQuery(window).ready(function(){
