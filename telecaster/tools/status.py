@@ -40,7 +40,8 @@ from telecaster.tools import *
 
 class Status(object):
 
-    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'wlan0', 'wlan1']
+    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4',
+                  'wlan0', 'wlan1', 'wlan2', 'wlan3', 'wlan4']
     acpi_states = {0: 'battery', 1: 'battery', 2: 'AC'}
 
     def __init__(self):
@@ -91,12 +92,18 @@ class Status(object):
         self.name = get_hostname()
 
     def get_ids(self):
-        edcast_pid = get_pid('edcast_jack', args=False)
-        deefuzzer_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'deefuzzer.xml')
-        jackd_pid = get_pid('jackd', args=False)
-        if jackd_pid == []:
-            jackd_pid = get_pid('jackdbus', args=False)
-        self.writing = edcast_pid != []
-        self.casting = deefuzzer_pid != []
-        self.jacking = jackd_pid != []
+        if get_pid('edcast_jack', args=False):
+            self.writing = True
+        else:
+            self.writing = False
+
+        if get_pid('deefuzzer', args=self.user_dir+os.sep+'deefuzzer.xml'):
+            self.casting = True
+        else:
+            self.casting = False
+
+        if get_pid('jackd', args=False):
+            self.jacking = True
+        else:
+            self.jacking = False
 

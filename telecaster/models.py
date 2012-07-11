@@ -62,7 +62,7 @@ class ShortTextField(models.TextField):
 
     def formfield(self, **kwargs):
          kwargs.update(
-            {"widget": Textarea(attrs={'rows':3, 'cols':30})}
+            {"widget": Textarea(attrs={'rows':4, 'cols':40})}
          )
          return super(ShortTextField, self).formfield(**kwargs)
 
@@ -73,26 +73,8 @@ add_introspection_rules([], ["^telecaster\.models\.ShortTextField"])
 class Station(Model):
 
     public_id         = CharField(_('public_id'), max_length=255)
-    organization      = ForeignKey('Organization', related_name='station',
-                                   verbose_name=_('organization'),
-                                   blank=True, null=True)
-    department        = ForeignKey('Department', related_name='station',
-                                   verbose_name=_('department'),
-                                   blank=True, null=True)
-    conference        = ForeignKey('Conference', related_name='station',
-                                   verbose_name=_('conference'),
-                                   blank=True, null=True)
-    session           = ForeignKey('Session', related_name='station',
-                                   verbose_name=_('session'),
-                                   blank=True, null=True)
-    professor         = ForeignKey('Professor', related_name='station',
-                                   verbose_name=_('professor'),
-                                   blank=True, null=True)
-    comment           = ShortTextField(_('comments'), blank=True)
     started           = BooleanField(_('started'))
-    datetime_start    = DateTimeField(_('time_start'), blank=True, null=True)
-    datetime_stop     = DateTimeField(_('time_stop'), blank=True, null=True)
-
+    conference        = ForeignKey(Conference, related_name='station', verbose_name=_('conference'))
 
     class Meta:
         db_table = app_label + '_' + 'station'
@@ -101,26 +83,11 @@ class Station(Model):
         return ' - '.join(self.description) + ' - ' + str(self.datetime_start) + ' > ' + str(self.datetime_stop)
 
     def to_dict(self):
-        dict = [{'id':'public_id','value': self.public_id, 'class':'', 'label':'public_id'},
-                {'id':'organization','value': self.organization, 'class':'', 'label':'Organization'},
-                {'id': 'department', 'value': self.department , 'class':'', 'label':'Department'},
-                {'id' : 'conference', 'value': self.conference, 'class':'' , 'label': 'Conference'},
-                {'id': 'professor', 'value': self.professor, 'class':'' , 'label': 'Professor'},
-                {'id': 'session', 'value': self.session, 'class':'' , 'label': 'Session'},
-                {'id': 'comment', 'value': self.comment, 'class':'' , 'label': 'Comment'},
-                {'id': 'started', 'value': str(self.started), 'class':'' , 'label': 'Started'},
-                ]
-        return dict
+        return self.conference.to_dict()
 
     @property
     def description(self):
-        description = [self.organization.name, self.conference.department.name, self.conference.title]
-        if self.session:
-            description.append(self.session.name)
-        if self.professor:
-            description.append(self.professor.name)
-        description.append(self.comment)
-        return description
+        return self.conference.description
 
     def set_conf(self, conf):
         self.conf = conf

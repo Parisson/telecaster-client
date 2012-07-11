@@ -35,7 +35,7 @@ def render(request, template, data = None, mimetype = None):
     return render_to_response(template, data, context_instance=RequestContext(request),
                               mimetype=mimetype)
 
-class WebView(object):
+class StationView(object):
 
     hidden_fields = ['started', 'datetime_start', 'datetime_stop', 'public_id']
 
@@ -55,7 +55,7 @@ class WebView(object):
         self.status = Status()
 
     def index(self, request):
-        template = 'telecaster/index.html'
+        template = 'telecaster/base.html'
         stations = Station.objects.filter(started=True)
         if stations:
             messages.warning(request, 'A station is already started !')

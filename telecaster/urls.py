@@ -37,12 +37,12 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from telecaster.models import *
-from telecaster.views import WebView
+from telecaster.views import StationView
 from jsonrpc import jsonrpc_site
 import os.path
 
 # initialization
-web_view = WebView()
+web_view = StationView()
 
 urlpatterns = patterns('',
     url(r'^$', web_view.index, name="telecaster-index"),
