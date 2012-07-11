@@ -80,7 +80,7 @@ class Station(Model):
         db_table = app_label + '_' + 'station'
 
     def __unicode__(self):
-        return ' - '.join(self.description) + ' - ' + str(self.datetime_start) + ' > ' + str(self.datetime_stop)
+        return self.description
 
     def to_dict(self):
         return self.conference.to_dict()
