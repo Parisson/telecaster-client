@@ -66,10 +66,15 @@ class Status(object):
           {'id': 'acpi_state','class': 'default', 'value': self.acpi_states[self.acpi.charging_state()], 'label': 'Power'},
           {'id': 'acpi_percent', 'class': 'default', 'value': str(self.acpi.percent()), 'label': 'Charge (%)'},
           {'id': 'temperature', 'class': 'default', 'value': self.temperature, 'label': 'Temperature'},
-          {'id': 'jack_state', 'class': 'default', 'value': self.jacking, 'label': 'Jack server'},
-          {'id': 'encoder_state','class': 'default', 'value': self.writing, 'label': 'Encoder'},
-          {'id': 'casting', 'class': 'default', 'value': self.casting, 'label': 'Broadcaster'},
-          {'id': 'writing', 'class': 'default', 'value': self.writing, 'label': 'Recorder'},
+          {'id': 'jackd', 'class': 'default', 'value': self.jacking, 'label': 'Jack server'},
+          {'id': 'audio_encoding','class': 'default',
+                'value': self.audio_encoding, 'label': 'Audio encoding'},
+          {'id': 'video_encoding','class': 'default',
+                'value': self.video_encoding, 'label': 'Video encoding'},
+          {'id': 'audio_streaming', 'class': 'default',
+                'value': self.audio_streaming, 'label': 'Audio streaming'},
+          {'id': 'video_streaming', 'class': 'default',
+                'value': self.video_streaming, 'label': 'Video streaming'},
           ]
 
         for stat in status:
@@ -92,18 +97,30 @@ class Status(object):
         self.name = get_hostname()
 
     def get_ids(self):
-        if get_pid('edcast_jack', args=False):
-            self.writing = True
-        else:
-            self.writing = False
-
-        if get_pid('deefuzzer', args=self.user_dir+os.sep+'deefuzzer.xml'):
-            self.casting = True
-        else:
-            self.casting = False
-
         if get_pid('jackd', args=False):
             self.jacking = True
         else:
             self.jacking = False
 
+        if get_pid('edcast_jack', args=False):
+            self.audio_encoding = True
+        else:
+            self.audio_encoding = False
+
+        if get_pid('gst-launch-0.10', args=False):
+            self.video_encoding = True
+        else:
+            self.video_encoding = False
+
+        audio_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'station_mp3.xml')
+        video_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'station_webm.xml')
+
+        if audio_pid:
+            self.audio_streaming = True
+        else:
+            self.audio_streaming = False
+
+        if video_pid:
+            self.video_streaming = True
+        else:
+            self.video_streaming = False

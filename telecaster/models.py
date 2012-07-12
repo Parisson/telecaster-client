@@ -104,11 +104,15 @@ class Station(Model):
     def description(self):
         return self.conference.description
 
+    @property
+    def slug(self):
+        return self.conference.slug
+
     def setup(self, conf_file):
         self.course = self.conference.course
         self.department = self.course.department.name
         self.organization = self.course.department.organization.name
-        self.mount_point = self.conference.slug
+        self.mount_point = self.slug
 
         self.conf = xml2dict(conf_file)
         self.date = datetime.datetime.now().strftime("%Y")
@@ -118,7 +122,6 @@ class Station(Model):
         self.uid = os.getuid()
         self.user = pwd.getpwuid(self.uid)[0]
         self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
-        self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + self.public_id + '.xml'
         self.encoder = 'TeleCaster system by Parisson'
         self.save()
 
@@ -138,16 +141,19 @@ class Station(Model):
 
     def deefuzzer_setup(self):
         for station in self.conf['deefuzzer']['station']:
-            output_dir = os.sep.join([station['record']['dir'],
-                                      self.date, self.department,
-                                      unicode(self.course), self.public_id])
+            output_dir = os.sep.join([self.date, self.department,
+                                      self.course.code + spacer + self.conference.course_type.name,
+                                      self.public_id
+                                    ])
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             station['infos']['short_name'] = self.mount_point
-            station['infos']['name'] = self.description
-            station['infos']['description'] = self.description
+            station['infos']['name'] = self.slug
+            station['infos']['description'] = self.slug
             station['record']['dir'] = output_dir
-            station['relay']['author'] = unicode(self.conference.professor)
+            station['relay']['author'] = unicode(self.conference.professor.user.username)
+            self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + \
+                                        station['media']['format'] + '.xml'
         self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
@@ -158,7 +164,7 @@ class Station(Model):
     def deefuzzer_start(self):
         command = 'deefuzzer ' + self.deefuzzer_user_file + ' > /dev/null &'
         os.system(command)
-        time.sleep(1)
+        time.sleep(0.5)
         self.pid = get_pid('deefuzzer', args=self.deefuzzer_user_file)
         self.save()
 
@@ -214,7 +220,6 @@ class Station(Model):
         self.started = False
         self.datetime_stop = datetime.datetime.now()
         self.rec_stop()
-        time.sleep(1)
         self.deefuzzer_stop()
         self.save()
 
