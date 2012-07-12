@@ -70,11 +70,26 @@ class ShortTextField(models.TextField):
 add_introspection_rules([], ["^telecaster\.models\.ShortTextField"])
 
 
+class OSC(Model):
+    "OSC server"
+
+    host               = CharField(_('host'), max_length=255)
+    port               = IntegerField(_('port'))
+
+    class Meta:
+        db_table = app_label + '_' + 'osc'
+
+
 class Station(Model):
+    "Media streaming station"
 
     public_id         = CharField(_('public_id'), max_length=255)
     started           = BooleanField(_('started'))
-    conference        = ForeignKey(Conference, related_name='station', verbose_name=_('conference'))
+    conference        = ForeignKey(Conference, related_name='station',
+                                    verbose_name=_('conference'))
+    pid               = IntegerField(_('pid'), blank=True, null=True)
+    osc               = ManyToManyField(OSC, related_name="station",
+                                    verbose_name=_('OSC'), blank=True, null=True)
 
     class Meta:
         db_table = app_label + '_' + 'station'
@@ -89,10 +104,11 @@ class Station(Model):
     def description(self):
         return self.conference.description
 
-    def set_conf(self, conf):
-        self.conf = conf
-
-    def setup(self):
+    def setup(self, conf_file):
+        self.department = self.conference.course.department.name
+        self.organization = self.conference.course.department.organization.name
+        conf_dict = xml2dict(conf_file)
+        self.conf = conf_dict['telecaster']
         self.date = datetime.datetime.now().strftime("%Y")
         self.time = datetime.datetime.now().strftime("%x-%X")
         self.time_txt = self.time.replace('/','_').replace(':','_').replace(' ','_')
@@ -108,44 +124,39 @@ class Station(Model):
         self.ogg_quality = self.conf['media']['ogg_quality']
         self.format = self.conf['media']['format']
         self.channels = int(self.conf['media']['channels'])
-        self.server_name = [self.organization, self.department, self.conference]
-        self.ServerDescription = clean_string('-'.join(self.description))
+        self.server_name = [self.organization, self.department, self.conference.slug]
+        self.ServerDescription = clean_string(self.description)
         self.ServerName = clean_string('_-_'.join(self.server_name))
-        self.mount_point = self.ServerName + '.' + self.format
-        self.filename = clean_string('_-_'.join(self.description[1:])) + '-' + self.time_txt + '.' + self.format
+        self.mount_point = self.conference.slug
+        self.filename = clean_string('_-_'.join(self.description[1:])) + \
+                                    '-' + self.time_txt + '.' + self.format
         self.output_dir = self.rec_dir + os.sep + self.date + os.sep + self.department
         self.file_dir = self.output_dir + os.sep + self.ServerName
         self.uid = os.getuid()
-        self.deefuzzer_pid = get_pid('/usr/bin/deefuzzer '+self.deefuzzer_user_file, self.uid)
         self.new_title = clean_string('-'.join(self.description))
         self.short_title = self.new_title
         self.genre = self.conf['infos']['genre']
         self.encoder = 'TeleCaster by Parisson'
+        self.save()
 
         if not os.path.exists(self.file_dir):
             os.makedirs(self.file_dir)
 
-        self.jack_inputs = []
-        if 'jack' in self.conf:
-            jack_inputs = self.conf['jack']['input']
-            if len(jack_inputs) > 1:
-                for jack_input in jack_inputs:
-                    self.jack_inputs.append(jack_input['name'])
-            else:
-                self.jack_inputs.append(jack_inputs['name'])
-
         self.deefuzzer_dict = xml2dict(self.deefuzzer_default_conf_file)
-        self.deefuzzer_osc_ports =  []
-        self.server_ports = []
 
         for station in self.deefuzzer_dict['deefuzzer']['station']:
             if station['control']['mode'] == '1':
-                self.deefuzzer_osc_ports.append(station['control']['port'])
-                self.server_ports.append(station['server']['port'])
-            if station['server']['host'] == 'localhost' or  station['server']['host'] == '127.0.0.1':
-                self.conf['play_port'] = station['server']['port']
-            else:
-                self.conf['play_port'] = '8000'
+                port = int(station['control']['port'])
+                osc = OSC.objects.filter(port=port)
+                if osc:
+                    self.osc.add(osc[0])
+                else:
+                    self.osc.create(host='127.0.0.1', port=port)
+
+#            if station['server']['host'] == 'localhost' or  station['server']['host'] == '127.0.0.1':
+#                self.conf['play_port'] = station['server']['port']
+#            else:
+#                self.conf['play_port'] = '8000'
 
     def deefuzzer_setup(self):
         i = 0
@@ -156,12 +167,12 @@ class Station(Model):
             station['infos']['genre'] = self.genre
             station['media']['bitrate'] = self.bitrate
             station['media']['dir'] = self.play_dir
-            station['media']['voices'] = str(len(self.jack_inputs))
             station['record']['dir'] = self.file_dir
             station['relay']['mode'] = '1'
-            station['relay']['author'] = self.professor
+            station['relay']['author'] = unicode(self.conference.professor)
             self.deefuzzer_dict['deefuzzer']['station'][i] = station
             i += 1
+        print self.deefuzzer_dict
         self.deefuzzer_xml = dicttoxml(self.deefuzzer_dict)
 
     def deefuzzer_write_conf(self):
@@ -172,22 +183,17 @@ class Station(Model):
     def deefuzzer_start(self):
         command = 'deefuzzer ' + self.deefuzzer_user_file + ' > /dev/null &'
         os.system(command)
-        self.set_lock()
+        time.sleep(2)
+        self.pid = get_pid('deefuzzer', args=self.deefuzzer_user_file)
+        self.save()
 
     def deefuzzer_stop(self):
-        if len(self.deefuzzer_pid) != 0:
-            os.system('kill -9 '+self.deefuzzer_pid[0])
+        os.system('kill -9 '+str(self.pid))
 
     def rec_stop(self):
-        if len(self.deefuzzer_pid) != 0:
-            for port in self.deefuzzer_osc_ports:
-                target = liblo.Address(int(port))
-                liblo.send(target, '/record', 0)
-
-    def mp3_convert(self):
-        os.system('oggdec -o - '+ self.file_dir+os.sep+self.filename+' | lame -S -m m -h -b '+ self.bitrate + \
-            ' --add-id3v2 --tt "'+ self.new_title + '" --ta "'+self.professor+'" --tl "'+self.organization+'" --ty "'+self.date+ \
-            '" --tg "'+self.genre+'" - ' + self.file_dir+os.sep+self.ServerDescription + '.mp3 &')
+        for osc in self.osc.all():
+            target = liblo.Address(int(osc.port))
+            liblo.send(target, '/record', 0)
 
     def write_tags_ogg(self):
        file = self.file_dir + os.sep + self.filename
@@ -224,35 +230,16 @@ class Station(Model):
 
     def start(self):
         self.started = True
-        self.datetime_start = datetime.datetime.now()
-#        self.deefuzzer_setup()
-#        self.deefuzzer_write_conf()
-#        self.deefuzzer_start()
+        self.deefuzzer_setup()
+        self.deefuzzer_write_conf()
+        self.deefuzzer_start()
         self.save()
 
     def stop(self):
         self.started = False
         self.datetime_stop = datetime.datetime.now()
-#        self.rec_stop()
-#        time.sleep(2)
-#        self.deefuzzer_stop()
+        self.rec_stop()
+        time.sleep(2)
+        self.deefuzzer_stop()
         self.save()
-
-    def configure(self, dict):
-        self.organization = dict['organization']
-        self.department = dict['department']
-        self.session = dict['session']
-        self.professor = dict['professor']
-        self.comment = dict['comment']
-        self.save()
-
-
-class Record(Model):
-
-    station = ForeignKey(Station, related_name='records', verbose_name='station',
-                         blank=True, null=True, on_delete=models.SET_NULL)
-    datetime = DateTimeField(_('record_date'), auto_now=True)
-    file = FileField(_('file'), upload_to='items/%Y/%m/%d')
-
-
 
