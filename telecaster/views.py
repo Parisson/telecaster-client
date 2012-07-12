@@ -35,40 +35,16 @@ def render(request, template, data = None, mimetype = None):
     return render_to_response(template, data, context_instance=RequestContext(request),
                               mimetype=mimetype)
 
-class StationView(object):
-
-    hidden_fields = ['started', 'datetime_start', 'datetime_stop', 'public_id']
-
-    def __init__(self):
-        self.uid = os.getuid()
-        self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
-        if not os.path.exists(self.user_dir):
-            os.makedirs(self.user_dir)
-        self.conf_file = settings.TELECASTER_CONF
-        conf_dict = xml2dict(self.conf_file)
-        self.conf = conf_dict['telecaster']
-        self.title = self.conf['infos']['name']
-        self.log_file = self.conf['log']
-        self.logger = Logger(self.log_file)
-        self.url = self.conf['infos']['url']
-        self.status = Status()
-
-    def index(self, request):
-        template = 'telecaster/base.html'
-        stations = Station.objects.filter(started=True)
-        if stations:
-            messages.warning(request, 'A station is already started !')
-        form = StationForm()
-        return render(request, template, {'station': form, 'hidden_fields': self.hidden_fields,
-                                            'host': self.get_host(request) })
+def get_host(request):
+    host = request.META['HTTP_HOST']
+    if ':' in host:
+        host = host.split(':')[0]
+    return host
 
 
-    def get_host(self, request):
-        host = request.META['HTTP_HOST']
-        if ':' in host:
-            host = host.split(':')[0]
-        return host
+class StatusView(object):
+
+
 
     @jsonrpc_method('telecaster.get_server_status')
     def get_server_status(request):
@@ -87,20 +63,8 @@ class StationView(object):
 
     @jsonrpc_method('telecaster.start')
     def start(request, station_dict):
-        if isinstance(station_dict, dict):
-            station = Station(public_id=dict['public_id'])
-            station.configure(station_dict)
-            conf = xml2dict(settings.TELECASTER_CONF)
-            conf = conf['telecaster']
-            station.set_conf(conf)
-            station.setup()
-            station.start()
-        else:
-            messages.error(request, 'Bad station dictionary')
+        pass
 
     @jsonrpc_method('telecaster.stop')
     def stop(request):
-        stations = Station.objects.filter(started=True)
-        for station in stations:
-            station.stop()
-
+        pass

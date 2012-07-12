@@ -56,7 +56,7 @@ from south.modelsinspector import add_introspection_rules
 from teleforma.models import *
 
 app_label = 'telecaster'
-
+spacer = '_-_'
 
 class ShortTextField(models.TextField):
 
@@ -105,46 +105,24 @@ class Station(Model):
         return self.conference.description
 
     def setup(self, conf_file):
-        self.department = self.conference.course.department.name
-        self.organization = self.conference.course.department.organization.name
-        conf_dict = xml2dict(conf_file)
-        self.conf = conf_dict['telecaster']
+        self.course = self.conference.course
+        self.department = self.course.department.name
+        self.organization = self.course.department.organization.name
+        self.mount_point = self.conference.slug
+
+        self.conf = xml2dict(conf_file)
         self.date = datetime.datetime.now().strftime("%Y")
         self.time = datetime.datetime.now().strftime("%x-%X")
         self.time_txt = self.time.replace('/','_').replace(':','_').replace(' ','_')
-        self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
-        self.rec_dir = self.conf['media']['rec_dir']
-        self.deefuzzer_default_conf_file = self.conf['deefuzzer']['conf']
-        self.deefuzzer_user_file = self.user_dir + os.sep + 'deefuzzer.xml'
-        self.bitrate = self.conf['media']['bitrate']
-        self.record = str_to_bool(self.conf['media']['record'])
-        self.rec_dir = self.conf['media']['rec_dir']
-        self.play_dir = self.conf['media']['play_dir']
-        self.ogg_quality = self.conf['media']['ogg_quality']
-        self.format = self.conf['media']['format']
-        self.channels = int(self.conf['media']['channels'])
-        self.server_name = [self.organization, self.department, self.conference.slug]
-        self.ServerDescription = clean_string(self.description)
-        self.ServerName = clean_string('_-_'.join(self.server_name))
-        self.mount_point = self.conference.slug
-        self.filename = clean_string('_-_'.join(self.description[1:])) + \
-                                    '-' + self.time_txt + '.' + self.format
-        self.output_dir = self.rec_dir + os.sep + self.date + os.sep + self.department
-        self.file_dir = self.output_dir + os.sep + self.ServerName
+
         self.uid = os.getuid()
-        self.new_title = clean_string('-'.join(self.description))
-        self.short_title = self.new_title
-        self.genre = self.conf['infos']['genre']
-        self.encoder = 'TeleCaster by Parisson'
+        self.user = pwd.getpwuid(self.uid)[0]
+        self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
+        self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + self.public_id + '.xml'
+        self.encoder = 'TeleCaster system by Parisson'
         self.save()
 
-        if not os.path.exists(self.file_dir):
-            os.makedirs(self.file_dir)
-
-        self.deefuzzer_dict = xml2dict(self.deefuzzer_default_conf_file)
-
-        for station in self.deefuzzer_dict['deefuzzer']['station']:
+        for station in self.conf['deefuzzer']['station']:
             if station['control']['mode'] == '1':
                 port = int(station['control']['port'])
                 osc = OSC.objects.filter(port=port)
@@ -159,21 +137,18 @@ class Station(Model):
 #                self.conf['play_port'] = '8000'
 
     def deefuzzer_setup(self):
-        i = 0
-        for station in self.deefuzzer_dict['deefuzzer']['station']:
+        for station in self.conf['deefuzzer']['station']:
+            output_dir = os.sep.join([station['record']['dir'],
+                                      self.date, self.department,
+                                      unicode(self.course), self.public_id])
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
             station['infos']['short_name'] = self.mount_point
-            station['infos']['name'] = self.ServerName
-            station['infos']['description'] = self.ServerDescription.replace(' ','_')
-            station['infos']['genre'] = self.genre
-            station['media']['bitrate'] = self.bitrate
-            station['media']['dir'] = self.play_dir
-            station['record']['dir'] = self.file_dir
-            station['relay']['mode'] = '1'
+            station['infos']['name'] = self.description
+            station['infos']['description'] = self.description
+            station['record']['dir'] = output_dir
             station['relay']['author'] = unicode(self.conference.professor)
-            self.deefuzzer_dict['deefuzzer']['station'][i] = station
-            i += 1
-        print self.deefuzzer_dict
-        self.deefuzzer_xml = dicttoxml(self.deefuzzer_dict)
+        self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
         conf_file = open(self.deefuzzer_user_file,'w')
@@ -183,7 +158,7 @@ class Station(Model):
     def deefuzzer_start(self):
         command = 'deefuzzer ' + self.deefuzzer_user_file + ' > /dev/null &'
         os.system(command)
-        time.sleep(2)
+        time.sleep(1)
         self.pid = get_pid('deefuzzer', args=self.deefuzzer_user_file)
         self.save()
 
@@ -239,7 +214,7 @@ class Station(Model):
         self.started = False
         self.datetime_stop = datetime.datetime.now()
         self.rec_stop()
-        time.sleep(2)
+        time.sleep(1)
         self.deefuzzer_stop()
         self.save()
 

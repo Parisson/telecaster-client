@@ -37,16 +37,13 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from telecaster.models import *
-from telecaster.views import StationView
+from telecaster.views import *
 from jsonrpc import jsonrpc_site
 import os.path
 
 # initialization
-web_view = StationView()
 
 urlpatterns = patterns('',
-    url(r'^$', web_view.index, name="telecaster-index"),
-    url(r'^stations/(?P<id>.*)/detail/$', web_view.index, name="telecaster-station-detail"),
 
     # JSON RPC
     url(r'json/$', jsonrpc_site.dispatch, name='jsonrpc_mountpoint'),
