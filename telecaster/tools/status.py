@@ -90,7 +90,7 @@ class Status(object):
                 ip = get_ip_address(interface)
                 if ip:
                     self.ip = ip
-                break
+                    break
             except:
                 self.ip = '127.0.0.1'
         self.url = 'http://' + self.ip
