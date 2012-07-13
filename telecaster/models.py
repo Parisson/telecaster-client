@@ -141,7 +141,7 @@ class Station(Model):
 
     def deefuzzer_setup(self):
         station = self.conf['deefuzzer']['station'][0]
-        output_dir = station['rec']['dir']
+        output_dir = station['record']['dir']
         if output_dir[-1] != os.sep:
             output_dir += os.sep
         output_dir += os.sep.join([self.date, self.department,
