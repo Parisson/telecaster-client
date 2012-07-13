@@ -140,7 +140,8 @@ class Station(Model):
 #                self.conf['play_port'] = '8000'
 
     def deefuzzer_setup(self):
-        output_dir = self.conf['deefuzzer']['station'][0]
+        station = self.conf['deefuzzer']['station'][0]
+        output_dir = station['rec']['dir']
         if output_dir[-1] != os.sep:
             output_dir += os.sep
         output_dir += os.sep.join([self.date, self.department,
