@@ -140,13 +140,16 @@ class Station(Model):
 #                self.conf['play_port'] = '8000'
 
     def deefuzzer_setup(self):
-        for station in self.conf['deefuzzer']['station']:
-            output_dir = os.sep.join([self.date, self.department,
+        output_dir = self.conf['deefuzzer']['station'][0]
+        if output_dir[-1] != os.sep:
+            output_dir += os.sep
+        output_dir += os.sep.join([self.date, self.department,
                                       self.course.code + spacer + self.conference.course_type.name,
                                       self.public_id
                                     ])
-            if not os.path.exists(output_dir):
+        if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
+        for station in self.conf['deefuzzer']['station']:
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
