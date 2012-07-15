@@ -38,7 +38,7 @@ import os
 import pwd
 import datetime
 import time
-import urllib
+import urllib2
 import liblo
 
 from tools import *
@@ -133,28 +133,26 @@ class Station(Model):
                     self.osc.add(osc[0])
                 else:
                     self.osc.create(host='127.0.0.1', port=port)
-
-#            if station['server']['host'] == 'localhost' or  station['server']['host'] == '127.0.0.1':
-#                self.conf['play_port'] = station['server']['port']
-#            else:
-#                self.conf['play_port'] = '8000'
-
+                    
     def deefuzzer_setup(self):
-        station = self.conf['deefuzzer']['station'][0]
-        output_dir = station['record']['dir']
-        if output_dir[-1] != os.sep:
-            output_dir += os.sep
-        output_dir += os.sep.join([self.date, self.department,
-                                      self.course.code + spacer + self.conference.course_type.name,
-                                      self.public_id
-                                    ])
-        if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+        self.output_dirs = []
+        self.urls = []
         for station in self.conf['deefuzzer']['station']:
+            if station['record']['mode'] != '0':
+                output_dir = station['record']['dir']
+                if output_dir[-1] != os.sep:
+                    output_dir += os.sep
+                output_dir += os.sep.join([self.date, self.department,
+                                        self.course.code + spacer + self.conference.course_type.name,
+                                        self.public_id
+                                        ])
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+                station['record']['dir'] = output_dir
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
-            station['record']['dir'] = output_dir
+            
             station['relay']['author'] = unicode(self.conference.professor.user.username)
             self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + \
                                         station['media']['format'] + '.xml'
@@ -212,7 +210,10 @@ class Station(Model):
             #tag = tags.__dict__['COMMENT']
             #audio.add(COM(encoding=3, text=self.comment))
             audio.save()
-
+            
+    def get_snapshot(self):
+        pass
+        
     def start(self):
         self.started = True
         self.deefuzzer_setup()

@@ -44,8 +44,6 @@ def get_host(request):
 
 class StatusView(object):
 
-
-
     @jsonrpc_method('telecaster.get_server_status')
     def get_server_status(request):
         status = Status()
