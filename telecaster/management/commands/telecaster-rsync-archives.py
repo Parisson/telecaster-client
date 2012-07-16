@@ -13,6 +13,7 @@ import os
 class Command(BaseCommand):
     help = "Synchronize local archives with backup server"
     admin_email = 'webmaster@parisson.com'
+    args = 'max-bandwith-in-kBps'
     archives = settings.MEDIA_ROOT
     server = settings.TELECASTER_RSYNC_SERVER
     log = settings.TELECASTER_RSYNC_LOG
@@ -22,6 +23,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         pid = get_pid('rsync')
         if not pid:
+            try:
+                bw = args[0]
+                self.command += '--bwlimit=' + bw + ' '
+            except:
+                pass
             stations = Station.objects.filter(started=True)
             ids = [station.public_id for station in stations]
             if ids:
