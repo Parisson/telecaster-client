@@ -103,14 +103,6 @@ def xml2dict(conf_file):
     dict = xmltodict(conf_xml,'utf-8')
     return dict
 
-import psutil
-
-PROCNAME = "deefuzzer"
-PROCARGS = ".telecaster/deefuzzer_webm.xml"
-
-
-
-
 def get_pid(name, args=None):
     """Get a process pid filtered by arguments and uid"""
     pids = []

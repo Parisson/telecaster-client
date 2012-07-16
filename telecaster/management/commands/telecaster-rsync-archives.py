@@ -17,18 +17,19 @@ class Command(BaseCommand):
     server = settings.TELECASTER_RSYNC_SERVER
     log = settings.TELECASTER_RSYNC_LOG
     logger = Logger(log)
-    command = 'rsync -aq ' 
-    
+    command = 'rsync -aq '
+
     def handle(self, *args, **options):
-        stations = Station.objects.filter(started=True)
-        ids = [station.public_id for station in stations]
-        if ids:
-            for id in ids:
-                self.command += '--exclude=%s ' % id
-        self.command += self.archives + ' ' + self.server
-        try:
-            os.system(self.command)
-            self.logger.write_info(self.command)
-        except:
-            self.logger.write_error('NOT rsynced')
-        
+        pid = get_pid('rsync')
+        if not pid:
+            stations = Station.objects.filter(started=True)
+            ids = [station.public_id for station in stations]
+            if ids:
+                for id in ids:
+                    self.command += '--exclude=%s ' % id
+            self.command += self.archives + ' ' + self.server
+            try:
+                os.system(self.command)
+                self.logger.write_info(self.command)
+            except:
+                self.logger.write_error('NOT rsynced')
