@@ -133,7 +133,7 @@ class Station(Model):
                     self.osc.add(osc[0])
                 else:
                     self.osc.create(host='127.0.0.1', port=port)
-                    
+
     def deefuzzer_setup(self):
         self.output_dirs = []
         self.urls = []
@@ -142,7 +142,7 @@ class Station(Model):
                 output_dir = station['record']['dir']
                 if output_dir[-1] != os.sep:
                     output_dir += os.sep
-                output_dir += os.sep.join([self.date, self.department,
+                output_dir += os.sep.join([self.date, self.organization, self.department,
                                         self.course.code + spacer + self.conference.course_type.name,
                                         self.public_id
                                         ])
@@ -152,7 +152,7 @@ class Station(Model):
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
-            
+
             station['relay']['author'] = unicode(self.conference.professor.user.username)
             self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + \
                                         station['media']['format'] + '.xml'
@@ -210,10 +210,10 @@ class Station(Model):
             #tag = tags.__dict__['COMMENT']
             #audio.add(COM(encoding=3, text=self.comment))
             audio.save()
-            
+
     def get_snapshot(self):
         pass
-        
+
     def start(self):
         self.started = True
         self.deefuzzer_setup()
