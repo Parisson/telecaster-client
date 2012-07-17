@@ -275,10 +275,10 @@ class AcpiLinux:
                         except ValueError:
                             self.life_capacity[i] = 0
 
-# it's possible that in battery/*/info the charging state is unknown
-# --> then we must check ac_state...
-# iterating over all batteries this way is not smart. better implementation needed
-# better are funcs for capacity, acstate and prrate
+                    # it's possible that in battery/*/info the charging state is unknown
+                    # --> then we must check ac_state...
+                    # iterating over all batteries this way is not smart. better implementation needed
+                    # better are funcs for capacity, acstate and prrate
 
                     # a little bit tricky... if loading of ac driver fails, we cant use info
                     # from /proc/ac_*/...
