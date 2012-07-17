@@ -142,7 +142,7 @@ class Station(Model):
                 output_dir = station['record']['dir']
                 if output_dir[-1] != os.sep:
                     output_dir += os.sep
-                output_dir += os.sep.join([self.date, self.organization, self.department,
+                output_dir += os.sep.join([self.organization, self.department, self.date,
                                         self.course.code + spacer + self.conference.course_type.name,
                                         self.public_id
                                         ])
