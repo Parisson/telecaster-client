@@ -149,6 +149,8 @@ class Station(Model):
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
                 station['record']['dir'] = output_dir
+                self.output_dir = output_dir
+
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
