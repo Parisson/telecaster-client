@@ -76,6 +76,9 @@ class OSC(Model):
     host               = CharField(_('host'), max_length=255)
     port               = IntegerField(_('port'))
 
+    def __unicode__(self):
+        return self.host + ':' + str(self.port)
+
     class Meta:
         db_table = app_label + '_' + 'osc'
 
