@@ -126,13 +126,14 @@ class Station(Model):
         self.save()
 
         for station in self.conf['deefuzzer']['station']:
-            if station['control']['mode'] == '1':
-                port = int(station['control']['port'])
-                osc = OSC.objects.filter(port=port)
-                if osc:
-                    self.osc.add(osc[0])
-                else:
-                    self.osc.create(host='127.0.0.1', port=port)
+            if station['control']['mode']:
+                if int(station['control']['mode']):
+                    port = int(station['control']['port'])
+                    osc = OSC.objects.filter(port=port)
+                    if osc:
+                        self.osc.add(osc[0])
+                    else:
+                        self.osc.create(host='localhost', port=port)
 
     def deefuzzer_setup(self):
         self.output_dirs = []
