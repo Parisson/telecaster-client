@@ -63,7 +63,7 @@ class Status(object):
         status = [
           {'id': 'name', 'class': 'default', 'value': self.name, 'label': 'Name'},
           {'id': 'ip', 'class': 'default', 'value': self.ip, 'label': 'IP address'},
-          {'id': 'acpi_state','class': 'default', 'value': self.acpi_states[self.acpi.charging_state()], 'label': 'Power'},
+          {'id': 'acpi_state','class': 'default', 'value': 'AC', 'label': 'Power'},
           {'id': 'acpi_percent', 'class': 'default', 'value': str(self.acpi.percent()), 'label': 'Charge (%)'},
           {'id': 'temperature', 'class': 'default', 'value': self.temperature, 'label': 'Temperature'},
           {'id': 'jackd', 'class': 'default', 'value': self.jacking, 'label': 'Jack server'},
