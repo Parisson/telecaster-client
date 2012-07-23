@@ -18,7 +18,7 @@ class Command(BaseCommand):
     server = settings.TELECASTER_RSYNC_SERVER
     log = settings.TELECASTER_RSYNC_LOG
     logger = Logger(log)
-    command = 'rsync -aq '
+    command = 'rsync -aqu '
 
     def handle(self, *args, **options):
         pid = get_pid('rsync')
