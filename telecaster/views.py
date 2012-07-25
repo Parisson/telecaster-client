@@ -41,12 +41,12 @@ def get_host(request):
         host = host.split(':')[0]
     return host
 
+status = Status()
 
 class StatusView(object):
 
     @jsonrpc_method('telecaster.get_server_status')
     def get_server_status(request):
-        status = Status()
         status.update()
         return status.to_dict()
 
