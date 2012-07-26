@@ -180,11 +180,11 @@ class Station(Model):
         command = 'deefuzzer ' + self.deefuzzer_file.path + ' > /dev/null &'
         os.system(command)
         time.sleep(0.5)
-        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file)
+        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
         self.save()
 
     def deefuzzer_stop(self):
-        pid = get_pid('deefuzzer', args=self.deefuzzer_file)
+        pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
         if pid == self.pid:
             os.system('kill -9 '+str(self.pid))
         else:
