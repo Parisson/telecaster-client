@@ -94,7 +94,7 @@ class Station(Model):
     osc               = ManyToManyField(OSC, related_name="station",
                                     verbose_name=_('OSC'), blank=True, null=True)
     record_dir        = CharField(_('record directory'), max_length=255, blank=True)
-    deefuzzer_file    = FilePathField(_('deefuzzer file'), path='/home/.www-data/.telecaster',
+    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='cache/',
                                    blank=True)
     format            = CharField(_('format'), max_length=100, blank=True)
 
@@ -166,17 +166,18 @@ class Station(Model):
 
         #FIXME: only one format in deefuzzer conf file
         self.format = station['media']['format']
-        self.deefuzzer_file =  'station_' + station['media']['format'] + '.xml'
+        self.deefuzzer_file = 'cache' + os.sep + 'station_' + \
+                                        station['media']['format'] + '.xml'
         self.save()
         self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
-        conf_file = open(self.deefuzzer_file,'w')
-        conf_file.write(self.deefuzzer_xml.path)
+        conf_file = open(self.deefuzzer_file.path,'w')
+        conf_file.write(self.deefuzzer_xml)
         conf_file.close()
 
     def deefuzzer_start(self):
-        command = 'deefuzzer ' + self.deefuzzer_file + ' > /dev/null &'
+        command = 'deefuzzer ' + self.deefuzzer_file.path + ' > /dev/null &'
         os.system(command)
         time.sleep(0.5)
         self.pid = get_pid('deefuzzer', args=self.deefuzzer_file)
