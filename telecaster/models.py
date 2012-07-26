@@ -172,7 +172,7 @@ class Station(Model):
         self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
-        conf_file = open(self.deefuzzer_file,'w')
+        conf_file = open(self.deefuzzer_file.path,'w')
         conf_file.write(self.deefuzzer_xml)
         conf_file.close()
 
