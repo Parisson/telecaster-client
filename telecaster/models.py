@@ -95,6 +95,7 @@ class Station(Model):
                                     verbose_name=_('OSC'), blank=True, null=True)
     record_dir        = CharField(_('record directory'), max_length=255, blank=True)
     deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='items/%Y/%m/%d', blank=True)
+    format            = CharField(_('format'), max_length=100, blank=True)
 
     class Meta:
         db_table = app_label + '_' + 'station'
@@ -164,6 +165,7 @@ class Station(Model):
             station['relay']['author'] = unicode(self.conference.professor.user.username)
 
         #FIXME: only one format in deefuzzer conf file
+        self.format = station['media']['format']
         self.deefuzzer_file = self.user_dir + os.sep + 'station_' + \
                                         station['media']['format'] + '.xml'
         self.save()
@@ -186,7 +188,10 @@ class Station(Model):
         if pid == self.pid:
             os.system('kill -9 '+str(self.pid))
         else:
-            os.system('touch ' + self.record_dir + os.sep + 'mp3.tofix')
+            if self.format == 'mp3':
+                os.system('touch ' + self.record_dir + os.sep + 'mp3.tofix')
+            elif self.format == 'webm':
+                os.system('touch ' + self.record_dir + os.sep + 'webm.tofix')
             try:
                 os.system('kill -9 '+str(self.pid))
             except:
