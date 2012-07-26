@@ -93,6 +93,8 @@ class Station(Model):
     pid               = IntegerField(_('pid'), blank=True, null=True)
     osc               = ManyToManyField(OSC, related_name="station",
                                     verbose_name=_('OSC'), blank=True, null=True)
+    record_dir        = CharField(_('record directory'), max_length=255, blank=True)
+    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='items/%Y/%m/%d', blank=True)
 
     class Meta:
         db_table = app_label + '_' + 'station'
@@ -153,30 +155,42 @@ class Station(Model):
                     os.makedirs(output_dir)
                 station['record']['dir'] = output_dir
                 self.output_dir = output_dir
+                self.record_dir = output_dir
+
 
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
-
             station['relay']['author'] = unicode(self.conference.professor.user.username)
-            self.deefuzzer_user_file = self.user_dir + os.sep + 'station_' + \
+
+        #FIXME: only one format in deefuzzer conf file
+        self.deefuzzer_file = self.user_dir + os.sep + 'station_' + \
                                         station['media']['format'] + '.xml'
+        self.save()
         self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
-        conf_file = open(self.deefuzzer_user_file,'w')
+        conf_file = open(self.deefuzzer_file,'w')
         conf_file.write(self.deefuzzer_xml)
         conf_file.close()
 
     def deefuzzer_start(self):
-        command = 'deefuzzer ' + self.deefuzzer_user_file + ' > /dev/null &'
+        command = 'deefuzzer ' + self.deefuzzer_file + ' > /dev/null &'
         os.system(command)
         time.sleep(0.5)
-        self.pid = get_pid('deefuzzer', args=self.deefuzzer_user_file)
+        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file)
         self.save()
 
     def deefuzzer_stop(self):
-        os.system('kill -9 '+str(self.pid))
+        pid = get_pid('deefuzzer', args=self.deefuzzer_file)
+        if pid == self.pid:
+            os.system('kill -9 '+str(self.pid))
+        else:
+            os.system('touch ' + self.record_dir + os.sep + 'mp3.tofix')
+            try:
+                os.system('kill -9 '+str(self.pid))
+            except:
+                pass
 
     def rec_stop(self):
         for osc in self.osc.all():
