@@ -35,8 +35,9 @@
 # Author: Guillaume Pellerin <yomguy@parisson.com>
 """
 
+import os
 from telecaster.tools import *
-
+from django.conf import settings
 
 class Status(object):
 
@@ -48,7 +49,7 @@ class Status(object):
         self.acpi = acpi.Acpi()
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = '/home/' + self.user + '/.telecaster'
+        self.user_dir = settings.MEDIA_ROOT + os.sep + 'cache'
 
     def update(self):
         self.acpi.update()
