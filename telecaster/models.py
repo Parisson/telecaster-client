@@ -94,7 +94,7 @@ class Station(Model):
     osc               = ManyToManyField(OSC, related_name="station",
                                     verbose_name=_('OSC'), blank=True, null=True)
     record_dir        = CharField(_('record directory'), max_length=255, blank=True)
-    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='/home/www-data/.telecaster/',
+    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='cache/',
                                    blank=True)
     format            = CharField(_('format'), max_length=100, blank=True)
 
@@ -128,7 +128,6 @@ class Station(Model):
 
         self.uid = os.getuid()
         self.user = pwd.getpwuid(self.uid)[0]
-        self.user_dir = '/home' + os.sep + self.user + os.sep + '.telecaster'
         self.encoder = 'TeleCaster system by Parisson'
         self.save()
 
@@ -167,7 +166,7 @@ class Station(Model):
 
         #FIXME: only one format in deefuzzer conf file
         self.format = station['media']['format']
-        self.deefuzzer_file = self.user_dir + os.sep + 'station_' + \
+        self.deefuzzer_file = 'cache' + os.sep + 'station_' + \
                                         station['media']['format'] + '.xml'
         self.save()
         self.deefuzzer_xml = dicttoxml(self.conf)
