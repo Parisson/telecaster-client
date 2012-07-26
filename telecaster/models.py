@@ -94,7 +94,8 @@ class Station(Model):
     osc               = ManyToManyField(OSC, related_name="station",
                                     verbose_name=_('OSC'), blank=True, null=True)
     record_dir        = CharField(_('record directory'), max_length=255, blank=True)
-    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='items/%Y/%m/%d', blank=True)
+    deefuzzer_file    = FileField(_('deefuzzer file'), upload_to='/home/www-data/.telecaster/',
+                                   blank=True)
     format            = CharField(_('format'), max_length=100, blank=True)
 
     class Meta:
