@@ -49,7 +49,7 @@ class Status(object):
         self.acpi = acpi.Acpi()
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = settings.MEDIA_ROOT + os.sep + 'cache'
+        self.user_dir = settings.MEDIA_ROOT + 'cache'
 
     def update(self):
         self.acpi.update()
