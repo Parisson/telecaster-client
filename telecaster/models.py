@@ -171,19 +171,19 @@ class Station(Model):
         self.deefuzzer_xml = dicttoxml(self.conf)
 
     def deefuzzer_write_conf(self):
-        conf_file = open(self.deefuzzer_file.path,'w')
+        conf_file = open(self.deefuzzer_file,'w')
         conf_file.write(self.deefuzzer_xml.path)
         conf_file.close()
 
     def deefuzzer_start(self):
-        command = 'deefuzzer ' + self.deefuzzer_file.path + ' > /dev/null &'
+        command = 'deefuzzer ' + self.deefuzzer_file + ' > /dev/null &'
         os.system(command)
         time.sleep(0.5)
-        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
+        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file)
         self.save()
 
     def deefuzzer_stop(self):
-        pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
+        pid = get_pid('deefuzzer', args=self.deefuzzer_file)
         if pid == self.pid:
             os.system('kill -9 '+str(self.pid))
         else:
