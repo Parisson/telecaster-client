@@ -4,6 +4,7 @@ Dependencies
  * telemeta
  * teleforma
  * telecaster-server
+ * deefuzzer
 
 
 LICENCE
