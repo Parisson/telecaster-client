@@ -53,10 +53,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from south.modelsinspector import add_introspection_rules
 
-from teleforma.models import *
+from teleforma.models import Conference
+
 
 app_label = 'telecaster'
 spacer = '_-_'
+
 
 class ShortTextField(models.TextField):
 
@@ -162,7 +164,10 @@ class Station(Model):
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
             station['infos']['description'] = self.slug
-            station['relay']['author'] = unicode(self.conference.professor.user.username)
+            if self.conference.professor:
+                station['relay']['author'] = unicode(self.conference.professor.user.username)
+            else:
+                station['relay']['author'] = ''
 
         #FIXME: only one format in deefuzzer conf file
         self.format = station['media']['format']
@@ -180,7 +185,9 @@ class Station(Model):
         command = 'deefuzzer ' + self.deefuzzer_file.path + ' > /dev/null &'
         os.system(command)
         time.sleep(0.5)
-        self.pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
+        pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
+        if pid:
+            self.pid = pid
         self.save()
 
     def deefuzzer_stop(self):
