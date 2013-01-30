@@ -132,8 +132,11 @@ class Station(Model):
         self.user = pwd.getpwuid(self.uid)[0]
         self.encoder = 'TeleCaster system by Parisson'
         self.save()
-
-        for station in self.conf['deefuzzer']['station']:
+        
+        self._stations = self.conf['deefuzzer']['station']
+        if not isinstance(self._stations,list):
+            self._stations = [self._stations]
+        for station in self._stations:
             if station['control']['mode'] != '0':
                 port = int(station['control']['port'])
                 osc = OSC.objects.filter(port=port)
@@ -145,7 +148,7 @@ class Station(Model):
     def deefuzzer_setup(self):
         self.output_dirs = []
         self.urls = []
-        for station in self.conf['deefuzzer']['station']:
+        for station in self._stations:
             if station['record']['mode'] != '0':
                 output_dir = station['record']['dir']
                 if output_dir[-1] != os.sep:
@@ -159,7 +162,6 @@ class Station(Model):
                 station['record']['dir'] = output_dir
                 self.output_dir = output_dir
                 self.record_dir = output_dir
-
 
             station['infos']['short_name'] = self.mount_point
             station['infos']['name'] = self.slug
