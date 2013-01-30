@@ -35,7 +35,7 @@ class Migration(SchemaMigration):
         # Changing field 'Station.session'
         db.alter_column('telecaster_station', 'session', self.gf('django.db.models.fields.CharField')(max_length=16))
         # Removing index on 'Station', fields ['session']
-        db.delete_index('telecaster_station', ['session_id'])
+        #db.delete_index('telecaster_station', ['session_id'])
 
 
         # Changing field 'Station.department'
