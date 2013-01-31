@@ -41,8 +41,6 @@ import time
 import urllib2
 import liblo
 
-from tools import *
-
 from mutagen.oggvorbis import OggVorbis
 from mutagen.id3 import ID3, TIT2, TP1, TAL, TDA, TDAT, TDRC, TCO, COM
 
@@ -54,6 +52,8 @@ from django.utils.translation import ugettext_lazy as _
 from south.modelsinspector import add_introspection_rules
 
 from teleforma.models import *
+
+from tools import *
 
 app_label = 'telecaster'
 spacer = '_-_'
