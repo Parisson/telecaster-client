@@ -100,6 +100,7 @@ class Station(Model):
 
     class Meta:
         db_table = app_label + '_' + 'station'
+        ordering = ['-conference__date_begin']
 
     def __unicode__(self):
         return self.description
@@ -114,6 +115,10 @@ class Station(Model):
     @property
     def slug(self):
         return self.conference.slug
+
+    @property
+    def date_added(self):
+        return self.conference.date_added
 
     def setup(self, conf_file):
         self.course = self.conference.course
