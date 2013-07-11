@@ -132,7 +132,7 @@ class Station(Model):
         self.user = pwd.getpwuid(self.uid)[0]
         self.encoder = 'TeleCaster system by Parisson'
         self.save()
-        
+
         self._stations = self.conf['deefuzzer']['station']
         if not isinstance(self._stations,list):
             self._stations = [self._stations]
