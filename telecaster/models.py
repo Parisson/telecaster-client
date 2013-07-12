@@ -41,8 +41,6 @@ import time
 import urllib2
 import liblo
 
-from tools import *
-
 from mutagen.oggvorbis import OggVorbis
 from mutagen.id3 import ID3, TIT2, TP1, TAL, TDA, TDAT, TDRC, TCO, COM
 
@@ -55,6 +53,8 @@ from south.modelsinspector import add_introspection_rules
 
 from teleforma.models import Conference
 
+
+from tools import *
 
 app_label = 'telecaster'
 spacer = '_-_'
@@ -102,6 +102,7 @@ class Station(Model):
 
     class Meta:
         db_table = app_label + '_' + 'station'
+        ordering = ['-conference__date_begin']
 
     def __unicode__(self):
         return self.description
@@ -116,6 +117,10 @@ class Station(Model):
     @property
     def slug(self):
         return self.conference.slug
+
+    @property
+    def date_added(self):
+        return self.conference.date_added
 
     def setup(self, conf_file):
         self.course = self.conference.course
