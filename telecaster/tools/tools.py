@@ -110,7 +110,8 @@ def get_pid(name, args=None):
         if proc.cmdline:
             if name == proc.name:
                 if args:
-                    if args in proc.cmdline[-1]:
+                    print proc.cmdline
+                    if args in proc.cmdline[1:]:
                         return proc.pid
                 else:
                     return proc.pid
