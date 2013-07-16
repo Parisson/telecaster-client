@@ -105,7 +105,6 @@ def xml2dict(conf_file):
 
 def get_pid(name, args=None):
     """Get a process pid filtered by arguments and uid"""
-    pids = []
     for proc in psutil.process_iter():
         if proc.cmdline:
             if name == proc.name:
@@ -115,7 +114,7 @@ def get_pid(name, args=None):
                         return proc.pid
                 else:
                     return proc.pid
-    return ''
+    return None
 
 def get_params_from_lock(lock_file):
     lockfile = open(lock_file,'r')

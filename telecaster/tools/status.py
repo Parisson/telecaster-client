@@ -49,7 +49,12 @@ class Status(object):
         self.acpi = acpi.Acpi()
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
-        self.user_dir = settings.MEDIA_ROOT + 'cache'
+        self.cache = settings.MEDIA_ROOT + 'cache'
+        self.monitoring_conf_dir = '/etc/telecaster/deefuzzer/'
+        self.mp3_monitoring_conf = self.monitoring_conf_dir + 'telecaster_mp3_monitor.yaml'
+        self.webm_monitoring_conf = self.monitoring_conf_dir + 'telecaster_webm_monitor.yaml'
+        self.mp3_streaming_conf = self.cache + 'station_mp3.xml'
+        self.webm_streaming_conf = self.cache + 'station_webm.xml'
 
     def update(self):
         self.acpi.update()
@@ -72,6 +77,10 @@ class Status(object):
                 'value': self.audio_encoding, 'label': 'Audio encoding'},
           {'id': 'video_encoding','class': 'default',
                 'value': self.video_encoding, 'label': 'Video encoding'},
+          {'id': 'audio_monitoring', 'class': 'default',
+                'value': self.audio_monitoring, 'label': 'Audio monitoring'},
+          {'id': 'video_monitoring', 'class': 'default',
+                'value': self.video_monitoring, 'label': 'Video monitoring'},
           {'id': 'audio_streaming', 'class': 'default',
                 'value': self.audio_streaming, 'label': 'Audio streaming'},
           {'id': 'video_streaming', 'class': 'default',
@@ -98,30 +107,13 @@ class Status(object):
         self.name = get_hostname()
 
     def get_ids(self):
-        if get_pid('jackd', args=False):
-            self.jacking = True
-        else:
-            self.jacking = False
+        self.jacking = get_pid('jackd', args=False) != None
 
-        if get_pid('gst-launch-0.10', args='lamemp3enc'):
-            self.audio_encoding = True
-        else:
-            self.audio_encoding = False
+        self.audio_encoding = get_pid('gst-launch-0.10', args='lamemp3enc') != None
+        self.video_encoding = get_pid('gst-launch-0.10', args='vp8enc') != None
 
-        if get_pid('gst-launch-0.10', args='vp8enc'):
-            self.video_encoding = True
-        else:
-            self.video_encoding = False
+        self.audio_monitoring = get_pid('deefuzzer', args=self.mp3_monitoring_conf) != None
+        self.video_monitoring = get_pid('deefuzzer', args=self.webm_monitoring_conf) != None
 
-        audio_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'station_mp3.xml')
-        video_pid = get_pid('deefuzzer', args=self.user_dir+os.sep+'station_webm.xml')
-
-        if audio_pid:
-            self.audio_streaming = True
-        else:
-            self.audio_streaming = False
-
-        if video_pid:
-            self.video_streaming = True
-        else:
-            self.video_streaming = False
+        self.audio_streaming = get_pid('deefuzzer', args=self.mp3_streaming_conf) != None
+        self.video_streaming = get_pid('deefuzzer', args=self.webm_streaming_conf) != None
