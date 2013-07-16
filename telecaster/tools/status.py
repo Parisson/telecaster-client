@@ -103,12 +103,12 @@ class Status(object):
         else:
             self.jacking = False
 
-        if get_pid('edcast_jack', args=False):
+        if get_pid('gst-launch-0.10', args='lamemp3enc'):
             self.audio_encoding = True
         else:
             self.audio_encoding = False
 
-        if get_pid('gst-launch-0.10', args=False):
+        if get_pid('gst-launch-0.10', args='vp8enc'):
             self.video_encoding = True
         else:
             self.video_encoding = False
