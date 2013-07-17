@@ -174,7 +174,7 @@ class Station(Model):
             if self.conference.professor:
                 station['relay']['author'] = unicode(self.conference.professor.user.username)
             else:
-                station['relay']['author'] = ''
+                station['relay']['author'] = 'None'
 
         #FIXME: only one format in deefuzzer conf file
         self.format = station['media']['format']
