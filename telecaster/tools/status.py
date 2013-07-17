@@ -49,7 +49,7 @@ class Status(object):
         self.acpi = acpi.Acpi()
         self.uid = os.getuid()
         self.user = pwd.getpwuid(os.getuid())[0]
-        self.cache = settings.MEDIA_ROOT + 'cache'
+        self.cache = settings.MEDIA_ROOT + 'cache/'
         self.monitoring_conf_dir = '/etc/telecaster/deefuzzer/'
         self.mp3_monitoring_conf = self.monitoring_conf_dir + 'telecaster_mp3_monitor.yaml'
         self.webm_monitoring_conf = self.monitoring_conf_dir + 'telecaster_webm_monitor.yaml'
