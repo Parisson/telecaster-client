@@ -75,10 +75,11 @@ def host(request):
     request_host = get_http_host(request)
     local_host = get_local_host()
 
-    if request_host.split('.')[0] == local_host.split('.')[0] or \
-                                 request_host == '127.0.0.1' or request_host == 'localhost':
-        # LAN access
+    if request_host.split('.')[0] == local_host.split('.')[0]:
         ip = local_host
+    elif request_host == '127.0.0.1' or request_host == 'localhost':
+        # LAN access
+        ip = '127.0.0.1'
     else:
         ip = settings.ROUTER_IP
 
