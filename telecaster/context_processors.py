@@ -83,4 +83,4 @@ def host(request):
     else:
         ip = settings.ROUTER_IP
 
-    return {'HOST': ip }
+    return {'host': ip }
