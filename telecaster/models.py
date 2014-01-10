@@ -68,7 +68,6 @@ class ShortTextField(models.TextField):
          )
          return super(ShortTextField, self).formfield(**kwargs)
 
-
 add_introspection_rules([], ["^telecaster\.models\.ShortTextField"])
 
 

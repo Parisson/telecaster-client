@@ -211,8 +211,6 @@ var playlistUtils = {
 
         var o = 'organization';
         var d = 'department';
-        var d = 'department';
-
         var dd = {};
         var playlist = this;
 
