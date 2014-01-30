@@ -43,9 +43,6 @@ def get_host(request):
     return host
 
 
-status = Status()
-
-
 class Status(object):
 
     interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5',
@@ -150,4 +147,6 @@ class StatusView(object):
     @jsonrpc_method('telecaster.stop')
     def stop(request):
         pass
+
+status = Status()
 
