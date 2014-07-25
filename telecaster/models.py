@@ -203,9 +203,9 @@ class Station(Model):
             os.system('kill -9 '+str(self.pid))
         else:
             if self.format == 'mp3':
-                os.system('touch ' + self.record_dir + os.sep + 'mp3.tofix')
+                os.system('touch "' + self.record_dir + os.sep + 'mp3.tofix"')
             elif self.format == 'webm':
-                os.system('touch ' + self.record_dir + os.sep + 'webm.tofix')
+                os.system('touch "' + self.record_dir + os.sep + 'webm.tofix"')
             try:
                 os.system('kill -9 '+str(self.pid))
             except:
