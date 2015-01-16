@@ -38,7 +38,7 @@ import socket
 import fcntl
 import struct
 
-interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5',
+interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5', 'eth6',
                   'wlan0', 'wlan1', 'wlan2', 'wlan3', 'wlan4']
 
 
