@@ -41,7 +41,7 @@ from django.conf import settings
 
 class Status(object):
 
-    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5', 'eth6',
+    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5', 'eth6', 'eth7', 'eth8', 'eth9',
                   'wlan0', 'wlan1', 'wlan2', 'wlan3', 'wlan4']
     acpi_states = {0: 'battery', 1: 'battery', 2: 'AC'}
 
