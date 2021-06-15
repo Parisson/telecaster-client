@@ -45,7 +45,8 @@ def get_host(request):
 
 class Status(object):
 
-    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5', 'eth6', 'eth7', 'eth8', 'eth9',
+    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5',
+                  'eth6', 'eth7', 'eth8', 'eth9', 'eno0', 'eno1',
                   'wlan0', 'wlan1', 'wlan2', 'wlan3', 'wlan4']
     
     acpi_states = {0: 'battery', 1: 'battery', 2: 'AC'}
@@ -114,8 +115,8 @@ class Status(object):
     def get_pids(self):
         self.jacking = get_pid('jackd', args=False) != None
 
-        self.audio_encoding = get_pid('gst-launch-0.10', args='lamemp3enc') != None
-        self.video_encoding = get_pid('gst-launch-0.10', args='vp8enc') != None
+        self.audio_encoding = get_pid('gst-launch-1.0', args='lamemp3enc') != None
+        self.video_encoding = get_pid('gst-launch-1.0', args='vp8enc') != None
 
         self.audio_monitoring = get_pid('deefuzzer', args=self.mp3_monitoring_conf) != None
         self.video_monitoring = get_pid('deefuzzer', args=self.webm_monitoring_conf) != None
