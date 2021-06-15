@@ -188,13 +188,12 @@ class Station(Model):
         conf_file.close()
 
     def deefuzzer_start(self):
-        command = '/usr/local/bin/deefuzzer ' + self.deefuzzer_file.path + ' > /dev/null &'
+        command = 'nohup /usr/local/bin/deefuzzer ' + self.deefuzzer_file.path + ' &'
         os.system(command)
         time.sleep(0.5)
         pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
         if pid:
             self.pid = pid
-        self.save()
 
     def deefuzzer_stop(self):
         pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
