@@ -39,10 +39,13 @@ import os
 from telecaster.tools import *
 from django.conf import settings
 
+
 class Status(object):
 
-    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5', 'eth6', 'eth7', 'eth8', 'eth9',
+    interfaces = ['eth0', 'eth1', 'eth2', 'eth0-eth2', 'eth3', 'eth4', 'eth5',
+                  'eth6', 'eth7', 'eth8', 'eth9', 'eno0', 'eno1',
                   'wlan0', 'wlan1', 'wlan2', 'wlan3', 'wlan4']
+
     acpi_states = {0: 'battery', 1: 'battery', 2: 'AC'}
 
     def __init__(self):
@@ -62,7 +65,7 @@ class Status(object):
             self.temperature = self.acpi.temperature(0)
         except:
             self.temperature = 'N/A'
-        self.get_ids()
+        self.get_pids()
         self.get_hosts()
 
     def to_dict(self):
@@ -106,7 +109,7 @@ class Status(object):
         self.url = 'http://' + self.ip
         self.name = get_hostname()
 
-    def get_ids(self):
+    def get_pids(self):
         self.jacking = get_pid('jackd', args=False) != None
 
         self.audio_encoding = get_pid('gst-launch-1.0', args='lamemp3enc') != None
