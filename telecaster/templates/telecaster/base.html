@@ -34,6 +34,18 @@ jQuery(window).ready(function(){
     a.unbind('click').click(function(){f.submit();return false;});
     });
 
+
+function getRndInteger(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+jQuery(window).ready(function() {
+    let video = $("#video_1");
+    let videoSource = $("#video_1 source");
+    let url = videoSource.attr("src");
+    url = url + "?v=" + getRndInteger(1, 10000);
+    videoSource.attr("src", url);
+    video.load();
+});
+
 </script>
 
 
