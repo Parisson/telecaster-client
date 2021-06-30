@@ -188,9 +188,9 @@ class Station(Model):
         conf_file.close()
 
     def deefuzzer_start(self):
-        command = 'nohup /usr/local/bin/deefuzzer ' + self.deefuzzer_file.path + ' &'
+        command = '/usr/local/bin/deefuzzer ' + self.deefuzzer_file.path + ' &'
         os.system(command)
-        time.sleep(0.5)
+        time.sleep(3)
         pid = get_pid('deefuzzer', args=self.deefuzzer_file.path)
         if pid:
             self.pid = pid
