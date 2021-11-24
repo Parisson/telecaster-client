@@ -51,6 +51,7 @@ class Status(object):
 
     interfaces = interfaces
     acpi_states = acpi_states
+    acpi_states = {0: 'battery', 1: 'battery', 2: 'AC'}
 
     def __init__(self):
         self.acpi = acpi.Acpi()
