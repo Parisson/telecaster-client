@@ -106,10 +106,10 @@ def xml2dict(conf_file):
 def get_pid(name, args=None):
     """Get a process pid filtered by arguments and uid"""
     for proc in psutil.process_iter():
-        if proc.cmdline:
-            if name == proc.name:
+        if proc.cmdline():
+            if name == proc.name():
                 if args:
-                    if args in proc.cmdline[1:]:
+                    if args in proc.cmdline()[1:]:
                         return proc.pid
                 else:
                     return proc.pid
