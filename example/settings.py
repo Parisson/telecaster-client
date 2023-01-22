@@ -8,9 +8,9 @@ TELECASTER_MASTER_SERVER = 'teleforma.parisson.com'
 TELECASTER_CONF = [{'type':'mp3','server_type':'icecast',
                     'conf':'/etc/telecaster/deefuzzer/telecaster_mp3_default.xml',
                     'port':'8000'},
-                   {'type':'webm','server_type':'stream-m',
+                   {'type':'webm','server_type':'icecast',
                    'conf':'/etc/telecaster/deefuzzer/telecaster_webm_default.xml',
-                   'port':'8080'}, ]
+                   'port':'8000'}, ]
 
 TELECASTER_RSYNC_SERVER = 'telecaster@jimi.parisson.com:archives/'
 
