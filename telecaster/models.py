@@ -233,8 +233,8 @@ class Station(Model):
         if os.path.exists(file):
             os.system('mp3info -t "a" -a "a" '+file)
             audio = ID3(file)
-            #tag = tags.__dict__['TITLE']
-            audio.add(TIT2(encoding=3, text=self.new_title.decode('utf8')))
+            # #tag = tags.__dict__['TITLE']
+            # audio.add(TIT2(encoding=3, text=self.new_title.decode('utf8')))
             #tag = tags.__dict__['ARTIST']
             audio.add(TP1(encoding=3, text=self.professor.decode('utf8')))
             #tag = tags.__dict__['ALBUM']
